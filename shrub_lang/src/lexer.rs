@@ -55,7 +55,13 @@ fn scan_token(lexer_data: &mut LexerData) {
             }
         }
 
-        '>' => {}
+        '>' => {
+            if char_match('=', lexer_data) {
+                append_generic_token(TokenType::GREATEREQUAL, lexer_data);
+            } else {
+                append_generic_token(TokenType::GREATER, lexer_data);
+            }
+        }
 
         _ => process::exit(1),
     }
