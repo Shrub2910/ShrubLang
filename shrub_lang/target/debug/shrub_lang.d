@@ -1,0 +1,1 @@
+C:\Users\isaac\OneDrive\Desktop\ShrubLang\shrub_lang\target\debug\shrub_lang.exe: C:\Users\isaac\OneDrive\Desktop\ShrubLang\shrub_lang\src\lexer.rs C:\Users\isaac\OneDrive\Desktop\ShrubLang\shrub_lang\src\main.rs C:\Users\isaac\OneDrive\Desktop\ShrubLang\shrub_lang\src\token.rs
