@@ -4,6 +4,7 @@ mod token;
 use std::env;
 use std::fs;
 use std::io;
+use std::io::Write;
 
 fn main() {
     let arguments: Vec<String> = env::args().collect();
@@ -28,12 +29,16 @@ fn run_file(file_name: &String) {
 fn run_repl() {
     loop {
         let mut input: String = String::new();
+        print!(">>> ");
+        io::stdout().flush().expect("Failed to flush buffer");
         match io::stdin().read_line(&mut input) {
             Ok(n) => {}
             Err(_) => {
-                println!("Failed to read file!");
+                println!("Failed to read input!");
             }
         }
+
+        println!("----------------");
 
         run(&input);
     }
