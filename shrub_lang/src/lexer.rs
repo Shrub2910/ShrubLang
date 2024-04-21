@@ -1,6 +1,7 @@
+use crate::shrub_error;
+use crate::shrub_error::SyntaxError;
 use crate::token;
 use std::collections::HashMap;
-use std::process;
 use token::TokenType;
 
 struct LexerData {
@@ -12,7 +13,7 @@ struct LexerData {
     key_words: HashMap<String, TokenType>,
 }
 
-pub fn scan_tokens(contents: &str) -> Vec<token::Token> {
+pub fn scan_tokens(contents: &str) -> Result<Vec<token::Token>, shrub_error::SyntaxError> {
     let characters: Vec<char> = contents.chars().collect();
     let tokens: Vec<token::Token> = Vec::new();
     let current: usize = 0;
@@ -33,7 +34,10 @@ pub fn scan_tokens(contents: &str) -> Vec<token::Token> {
 
     while !is_at_end(&mut lexer_data) {
         lexer_data.start = lexer_data.current;
-        scan_token(&mut lexer_data);
+        match scan_token(&mut lexer_data) {
+            Ok(_) => {}
+            Err(e) => return Err(e),
+        }
     }
 
     lexer_data.tokens.push(token::Token {
@@ -43,7 +47,7 @@ pub fn scan_tokens(contents: &str) -> Vec<token::Token> {
         line_number: lexer_data.line_number,
     });
 
-    lexer_data.tokens
+    Ok(lexer_data.tokens)
 }
 
 fn populate_key_words(keywords: &mut HashMap<String, TokenType>) {
@@ -64,7 +68,7 @@ fn populate_key_words(keywords: &mut HashMap<String, TokenType>) {
     keywords.insert("super".to_string(), TokenType::SUPER);
 }
 
-fn scan_token(lexer_data: &mut LexerData) {
+fn scan_token(lexer_data: &mut LexerData) -> Result<(), shrub_error::SyntaxError> {
     let c: char = advance(lexer_data);
     match c {
         '(' => append_generic_token(TokenType::LBRACKET, lexer_data),
@@ -123,7 +127,15 @@ fn scan_token(lexer_data: &mut LexerData) {
 
         '\n' => lexer_data.line_number += 1,
 
-        '"' => create_string(lexer_data),
+        '"' => match create_string(lexer_data) {
+            Ok(_) => {}
+            Err(m) => {
+                return Err(SyntaxError {
+                    message: m,
+                    line_number: lexer_data.line_number,
+                })
+            }
+        },
 
         _ => {
             if is_number(c) {
@@ -131,12 +143,14 @@ fn scan_token(lexer_data: &mut LexerData) {
             } else if is_alpha(c) {
                 identifier(lexer_data);
             } else {
-                //Add error handling here in future
-                println!("Unexpected character");
-                process::exit(1);
+                return Err(shrub_error::SyntaxError {
+                    message: String::from("Unexpected Character"),
+                    line_number: lexer_data.line_number,
+                });
             }
         }
     }
+    Ok(())
 }
 
 fn identifier(lexer_data: &mut LexerData) {
@@ -180,15 +194,13 @@ fn number(lexer_data: &mut LexerData) {
     );
 }
 
-fn create_string(lexer_data: &mut LexerData) {
-    while peek(lexer_data) != '"' && !is_at_end(lexer_data) {
+fn create_string(lexer_data: &mut LexerData) -> Result<(), String> {
+    while !is_at_end(lexer_data) && peek(lexer_data) != '"' {
         advance(lexer_data);
     }
 
     if is_at_end(lexer_data) {
-        //Add error handling here in future
-        println!("String does not terminate.");
-        process::exit(1);
+        return Err(String::from("String never terminates."));
     }
 
     advance(lexer_data);
@@ -200,6 +212,8 @@ fn create_string(lexer_data: &mut LexerData) {
         token::DataType::TEXT(string_value),
         lexer_data,
     );
+
+    Ok(())
 }
 
 fn is_alpha(character: char) -> bool {

@@ -1,5 +1,4 @@
 use core::fmt;
-use std::collections::HashMap;
 
 #[derive(Clone, Copy)]
 pub enum TokenType {

@@ -1,4 +1,5 @@
 mod lexer;
+mod shrub_error;
 mod token;
 
 use std::env;
@@ -32,7 +33,7 @@ fn run_repl() {
         print!(">>> ");
         io::stdout().flush().expect("Failed to flush buffer");
         match io::stdin().read_line(&mut input) {
-            Ok(n) => {}
+            Ok(_) => {}
             Err(_) => {
                 println!("Failed to read input!");
             }
@@ -45,7 +46,16 @@ fn run_repl() {
 }
 
 fn run(contents: &String) {
-    let tokens: Vec<token::Token> = lexer::scan_tokens(&contents);
+    let tokens: Vec<token::Token>;
+    match lexer::scan_tokens(&contents) {
+        Ok(t) => {
+            tokens = t;
+        }
+        Err(e) => {
+            eprintln!("Error at line {}: {}", e.line_number, e.message);
+            return;
+        }
+    };
     for new_token in tokens.iter() {
         println!("{}", new_token.to_string());
     }
