@@ -1,5 +1,7 @@
-TODO: Make this file useful. or smt
+# Shrublang
 
-This is an interpreted programming language made in Rust. 
-It is going to convert into bytecode or smt and then interpret that.
-Good look reading it I didn't comment shit.
+## What it will be
+An interpreted programming laguage with a virtual machine
+
+## What has been done so far
+There is a lexer that will convert expressions into tokens but that is all at the moment
